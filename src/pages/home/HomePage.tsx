@@ -4,7 +4,7 @@ import SwipeDeck from "@/components/mainpage/SwipeDeck";
 import { useAuctionDeck } from "@/hooks/auction/useAuctionDeckApi";
 
 export default function HomePage() {
-  const { deck, isLoading, error, loadMore } = useAuctionDeck();
+  const { deck, isLoading, error, removeTopCard } = useAuctionDeck();
 
   return (
     <main className="relative w-full min-h-full bg-white flex flex-col">
@@ -26,7 +26,7 @@ export default function HomePage() {
         )}
 
         {deck.length > 0 && (
-          <SwipeDeck items={deck} onDeckExhausted={loadMore} />
+          <SwipeDeck items={deck} onRemoveCard={removeTopCard} />
         )}
       </section>
     </main>

@@ -2,11 +2,12 @@ import { useBidApi } from "@/hooks/item/bid/useBidApi";
 import { useUserStore } from "@/store/useUserStore";
 import { useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 export const useItemBid = (currentPrice: number, auctionId: number) => {
   const [isBidSheetOpen, setBidSheetOpen] = useState(false);
   const [currentHighestPrice, setCurrentHighestPrice] = useState(currentPrice);
+  const bidInFlight = useRef(false);
   const queryClient = useQueryClient();
 
   const { postSwipMutation, postBidMutation } = useBidApi();
@@ -23,41 +24,33 @@ export const useItemBid = (currentPrice: number, auctionId: number) => {
   };
 
   const handleBidSubmit = (amount: number) => {
-    swipeAction(
+    if (bidInFlight.current || !userId) return;
+    bidInFlight.current = true;
+
+    createBid(
       {
-        auctionId: auctionId,
-        action: "BIDDING",
+        auctionId,
+        bidPrice: amount,
       },
       {
-        onSuccess: () => {
-          createBid(
-            {
-              auctionId: auctionId,
-              userId: userId as number,
-              bidPrice: amount,
-            },
-            {
-              onSuccess: () => {
-                setCurrentHighestPrice(amount);
-                setBidSheetOpen(false);
-                queryClient.invalidateQueries({
-                  queryKey: ["auctionDetail", auctionId],
-                });
-                queryClient.invalidateQueries({
-                  queryKey: ["bidHistory", auctionId],
-                });
-              },
-              onError: (err: AxiosError<{ message: string }>) => {
-                alert(
-                  err.response?.data.message || "입찰 도중 오류가 발생했습니다."
-                );
-              },
-            }
+        onSuccess: bid => {
+          bidInFlight.current = false;
+          setCurrentHighestPrice(amount);
+          setBidSheetOpen(false);
+          queryClient.invalidateQueries({
+            queryKey: ["auctionDetail", auctionId],
+          });
+          queryClient.invalidateQueries({
+            queryKey: ["bidHistory", auctionId],
+          });
+          swipeAction(
+            { auctionId, action: "BIDDING", bidId: bid.bidId },
+            { onError: err => console.error("입찰 상태 기록 실패:", err) }
           );
         },
-        onError: err => {
-          console.error(err);
-          alert("입찰에 실패했습니다.");
+        onError: (err: AxiosError<{ message: string }>) => {
+          bidInFlight.current = false;
+          alert(err.response?.data.message || "입찰 도중 오류가 발생했습니다.");
         },
       }
     );

@@ -23,7 +23,7 @@ export const useItemState = ({ item }: UseItemStateProps): ItemState => {
   const hasBid = item.myBidPrice !== null && item.myBidPrice > 0;
   const isWinner = item.winner?.user_id === userId;
   const isLive = item.status === "IN_PROGRESS";
-  const isEnded = item.status === "CLOSED" || item.status === "CANCELED";
+  const isEnded = item.status === "CLOSED" || item.status === "CANCELLED";
 
   /**
    * LIVE : 입찰 안 함(경매중)

@@ -1,7 +1,6 @@
 import { postChargePoint } from "@/apis/my/pointApi";
 import { Check } from "@/assets/svgs/common";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
-import { useUserStore } from "@/store/useUserStore";
 import { formatPrice } from "@/utils/priceUtils";
 import { AxiosError } from "axios";
 import { useEffect, useRef, useState } from "react";
@@ -11,7 +10,6 @@ const PaymentSuccessPage = () => {
   const navigate = useNavigate();
   const [params] = useSearchParams();
 
-  const [isLoading, setIsLoading] = useState(false);
   const [isConfirmed, setIsConfirmed] = useState(false);
 
   const isProcessing = useRef(false);
@@ -20,11 +18,16 @@ const PaymentSuccessPage = () => {
   const orderId = params.get("orderId");
   const amount = params.get("amount");
 
-  const userId = useUserStore(state => state.userId);
-
   useEffect(() => {
     const confirmPayment = async () => {
-      if (!paymentKey || !orderId || !amount) {
+      const paymentAmount = Number(amount);
+      if (
+        !paymentKey ||
+        !orderId ||
+        !amount ||
+        !Number.isSafeInteger(paymentAmount) ||
+        paymentAmount <= 0
+      ) {
         navigate(
           "/payment/fail?message=잘못된 접근입니다.&code=INVALID_PARAMS",
           { replace: true }
@@ -39,7 +42,7 @@ const PaymentSuccessPage = () => {
         await postChargePoint({
           paymentKey,
           orderId,
-          amount: Number(amount),
+          amount: paymentAmount,
         });
 
         setIsConfirmed(true);
@@ -64,13 +67,11 @@ const PaymentSuccessPage = () => {
           `/payment/fail?message=${encodeURIComponent(errorMessage)}&code=${errorCode}`,
           { replace: true }
         );
-      } finally {
-        setIsLoading(false);
       }
     };
 
     confirmPayment();
-  }, [paymentKey, orderId, amount, userId, navigate]);
+  }, [paymentKey, orderId, amount, navigate]);
 
   const handleGoHome = () => {
     navigate("/", { replace: true });
@@ -80,7 +81,7 @@ const PaymentSuccessPage = () => {
     navigate("/my/points", { replace: true });
   };
 
-  if (isLoading) {
+  if (!isConfirmed) {
     return <LoadingSpinner />;
   }
 

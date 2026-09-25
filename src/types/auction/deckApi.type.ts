@@ -13,12 +13,9 @@ export interface DeckAuctionResponse {
   auctions: DeckAuctionItem[];
 }
 
-export type SwipeActionType = "DISLIKE" | "HOLD" | "BIDDING";
-
-export interface SwipeActionRequest {
-  auctionId: number;
-  action: SwipeActionType;
-}
+export type SwipeActionRequest =
+  | { auctionId: number; action: "BIDDING"; bidId: number }
+  | { auctionId: number; action: "DISLIKE" | "HOLD" };
 
 export interface SwipeActionResponse {
   success: boolean;

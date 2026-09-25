@@ -23,7 +23,7 @@ export interface AuctionDetailResponse {
   startPrice: number;
   currentPrice: number;
   imageUrl: string[];
-  status: "IN_PROGRESS" | "CLOSED" | "CANCELED";
+  status: "IN_PROGRESS" | "CLOSED" | "CANCELLED";
   transactionMethod: "FACE_TO_FACE" | "DELIVERY";
   startAt: string;
   endAt: string;

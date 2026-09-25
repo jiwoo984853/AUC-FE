@@ -3,7 +3,7 @@ import { BidHistoryResponse } from "@/types/item/bid/bidApi.type";
 import { useState } from "react";
 
 interface BidHistoryListProps {
-  status: "IN_PROGRESS" | "CLOSED" | "CANCELED";
+  status: "IN_PROGRESS" | "CLOSED" | "CANCELLED";
   bidData: BidHistoryResponse;
 }
 
@@ -23,7 +23,7 @@ const BidHistoryList = ({ status, bidData }: BidHistoryListProps) => {
               const rank = index + 1;
 
               const isWinner =
-                (status === "CLOSED" || status === "CANCELED") && rank === 1;
+                (status === "CLOSED" || status === "CANCELLED") && rank === 1;
               const isCurrentTop = status === "IN_PROGRESS" && rank === 1;
 
               return (

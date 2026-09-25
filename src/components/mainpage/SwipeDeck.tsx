@@ -6,19 +6,17 @@ import { useBidApi } from "@/hooks/item/bid/useBidApi";
 import { useUserStore } from "@/store/useUserStore";
 import type { DeckAuctionItem } from "@/types/auction/deckApi.type";
 import { AxiosError } from "axios";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 interface SwipeDeckProps {
   items: DeckAuctionItem[];
-  onDeckExhausted: () => void;
+  onRemoveCard: () => void;
 }
 
-export default function SwipeDeck({ items, onDeckExhausted }: SwipeDeckProps) {
-  const [index, setIndex] = useState(0);
-
+export default function SwipeDeck({ items, onRemoveCard }: SwipeDeckProps) {
   const userId = useUserStore(state => state.userId);
 
-  const current = items[index];
+  const current = items[0];
   const [price, setPrice] = useState(current ? current.currentPrice : 0);
 
   const { postSwipMutation, postBidMutation } = useBidApi();
@@ -26,6 +24,7 @@ export default function SwipeDeck({ items, onDeckExhausted }: SwipeDeckProps) {
   const { mutate: swipeAction } = postSwipMutation();
 
   const [sheetOpen, setSheetOpen] = useState(false);
+  const bidInFlight = useRef(false);
 
   useEffect(() => {
     if (current) {
@@ -41,14 +40,12 @@ export default function SwipeDeck({ items, onDeckExhausted }: SwipeDeckProps) {
   const closeBidSheet = () => setSheetOpen(false);
 
   const removeCard = () => {
-    if (items.length > 0 && items.length - (index + 1) <= 3) {
-      onDeckExhausted();
-    }
-    setIndex(prev => prev + 1);
+    onRemoveCard();
   };
 
   // 입찰
   const performBid = () => {
+    if (bidInFlight.current) return;
     if (!current || !userId) {
       alert("오류가 발생했습니다. 다시 시도해 주세요.");
       return;
@@ -59,36 +56,29 @@ export default function SwipeDeck({ items, onDeckExhausted }: SwipeDeckProps) {
       return;
     }
 
-    swipeAction(
+    const auctionId = current.id;
+    const bidPrice = price;
+    bidInFlight.current = true;
+
+    createBid(
       {
-        auctionId: current.id,
-        action: "BIDDING",
+        auctionId,
+        bidPrice,
       },
       {
-        onSuccess: () => {
-          createBid(
-            {
-              auctionId: current.id,
-              userId: userId,
-              bidPrice: price,
-            },
-            {
-              onSuccess: () => {
-                current.bidPrice = current.currentPrice = price;
-                current.bidPlaced = true;
-                setSheetOpen(false);
-              },
-              onError: (err: AxiosError<{ message: string }>) => {
-                alert(
-                  err.response?.data.message || "입찰 도중 오류가 발생했습니다."
-                );
-              },
-            }
+        onSuccess: bid => {
+          bidInFlight.current = false;
+          current.bidPrice = current.currentPrice = bidPrice;
+          current.bidPlaced = true;
+          setSheetOpen(false);
+          swipeAction(
+            { auctionId, action: "BIDDING", bidId: bid.bidId },
+            { onError: err => console.error("입찰 상태 기록 실패:", err) }
           );
         },
-        onError: err => {
-          console.error(err);
-          alert("입찰에 실패했습니다.");
+        onError: (err: AxiosError<{ message: string }>) => {
+          bidInFlight.current = false;
+          alert(err.response?.data.message || "입찰 도중 오류가 발생했습니다.");
         },
       }
     );
@@ -131,10 +121,7 @@ export default function SwipeDeck({ items, onDeckExhausted }: SwipeDeckProps) {
     }
   };
 
-  const visible = useMemo(() => {
-    if (!items || items.length === 0) return [];
-    return items.slice(index, index + 3);
-  }, [items, index]);
+  const visible = items.slice(0, 3);
 
   return (
     <div className="relative mx-auto h-[640px] w-[360px]">

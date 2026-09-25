@@ -44,3 +44,9 @@ coverage
 
 # ESLint 캐시
 .eslintcache
+# IDE settings
+.idea/
+
+# Environment files
+.env.*
+!.env.example

@@ -1,4 +1,4 @@
-# 🚀 PLIP – Gamified Auction Commerce
+# 🚀 Auc – Gamified Auction Commerce
 **가볍게 넘기고 빠르게 입찰하는, 숏폼 기반 경매형 중고거래 플랫폼**
 
 ## 🧠 서비스 개요

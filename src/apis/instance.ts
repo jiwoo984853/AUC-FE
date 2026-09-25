@@ -1,4 +1,5 @@
 import { useAuthStore } from "@/store/useAuthStore";
+import { refreshAccessToken } from "@/apis/auth/refreshAccessToken";
 import axios from "axios";
 
 const instance = axios.create({
@@ -25,38 +26,20 @@ instance.interceptors.response.use(
   async err => {
     const original = err.config;
 
-    if (
-      (err.response?.status === 401 || err.response?.status === 403) &&
-      !original._retry
-    ) {
+    if (err.response?.status === 401 && original && !original._retry) {
       original._retry = true;
 
-      const { refreshToken, login, logout } = useAuthStore.getState();
-
-      if (!refreshToken) {
-        logout();
-        window.location.href = "/login";
-        return;
-      }
-
       try {
-        const refresh = await axios.post(
-          `${import.meta.env.VITE_SERVER_API_URL}/token/access`,
-          { refreshToken: refreshToken },
-          { withCredentials: true }
-        );
+        const { accessToken } = await refreshAccessToken();
+        useAuthStore.getState().setAccessToken(accessToken);
 
-        login(refresh.data.accessToken, refreshToken);
-
-        original.headers.set(
-          "Authorization",
-          `Bearer ${refresh.data.accessToken}`
-        );
+        original.headers.set("Authorization", `Bearer ${accessToken}`);
 
         return instance(original);
       } catch {
-        logout();
+        useAuthStore.getState().logout();
         window.location.href = "/login";
+        return Promise.reject(err);
       }
     }
 

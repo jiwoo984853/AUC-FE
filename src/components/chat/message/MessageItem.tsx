@@ -5,9 +5,10 @@ import { formatTimeStamp } from "@/utils/dateUtils";
 
 interface MessageItemProps {
   msg: ChatMessageItem;
+  onRemoveFailed: (clientMessageId: string) => void;
 }
 
-const MessageItem = ({ msg }: MessageItemProps) => {
+const MessageItem = ({ msg, onRemoveFailed }: MessageItemProps) => {
   const userId = useUserStore(state => state.userId);
   const isSender = msg.myMessage || msg.senderId === userId;
 
@@ -24,6 +25,18 @@ const MessageItem = ({ msg }: MessageItemProps) => {
               {formatTimeStamp(msg.sendAt || new Date().toISOString())}
             </span>
             {msg.isRead && <Read className="w-3 h-3" />}
+            {msg.deliveryStatus === "pending" && <span>전송 중</span>}
+            {msg.deliveryStatus === "failed" && (
+              <button
+                type="button"
+                onClick={() =>
+                  msg.clientMessageId && onRemoveFailed(msg.clientMessageId)
+                }
+                className="text-red-500 underline cursor-pointer"
+              >
+                전송 확인 실패 · 삭제
+              </button>
+            )}
           </div>
         </div>
       </div>

@@ -41,7 +41,6 @@ export interface BidHistoryResponse {
 
 export interface CreateBidRequest {
   auctionId: number;
-  userId: number;
   bidPrice: number;
 }
 
@@ -51,6 +50,6 @@ export interface CreateBidResponse {
   auctionId: number;
   bidPrice: number;
   depositAmount: number;
-  status: "PENDING" | "SUCCESS" | "FAILED" | "CANCELED";
+  status: "PENDING" | "SUCCESS" | "FAILED" | "CANCELLED";
   depositStatus: "HELD" | "REFUNDED" | "USED";
 }

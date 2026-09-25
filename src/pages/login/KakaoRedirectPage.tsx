@@ -2,20 +2,9 @@ import { useEffect, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
 import LoadingSpinner from "@/components/common/LoadingSpinner";
+import { refreshAccessToken } from "@/apis/auth/refreshAccessToken";
 import { useAuthApi } from "@/hooks/auth/useAuthApi";
 import { useAuthStore } from "@/store/useAuthStore";
-
-// 쿠키 추출
-const getCookie = (name: string): string | null => {
-  const nameEQ = name + "=";
-  const ca = document.cookie.split(";");
-  for (let i = 0; i < ca.length; i++) {
-    let c = ca[i];
-    while (c.charAt(0) === " ") c = c.substring(1, c.length);
-    if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
-  }
-  return null;
-};
 
 const KakaoRedirectPage = () => {
   const navigate = useNavigate();
@@ -28,36 +17,27 @@ const KakaoRedirectPage = () => {
   useEffect(() => {
     if (isProcessing.current) return;
 
-    const accessToken = searchParams.get("token");
     const firstLoginParam = searchParams.get("isFirstLogin");
-    const refreshToken = getCookie("refresh_token");
+    isProcessing.current = true;
 
-    if (accessToken) {
-      isProcessing.current = true;
-
-      authLogin(accessToken, refreshToken || "");
-
-      // refreshToken 쿠키 초기화
-      document.cookie =
-        "refresh_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-
-      if (firstLoginParam === "true") {
-        navigate("/register/additional-info", { replace: true });
-      } else {
-        getUserProfileMutation
-          .mutateAsync(undefined)
-          .then(() => {
-            navigate("/", { replace: true });
-          })
-          .catch(error => {
-            console.error("유저 정보 조회 실패:", error);
-            navigate("/login", { replace: true });
-          });
+    const finishLogin = async () => {
+      try {
+        const { accessToken } = await refreshAccessToken();
+        authLogin(accessToken);
+        if (firstLoginParam === "true") {
+          navigate("/register/additional-info", { replace: true });
+        } else {
+          await getUserProfileMutation.mutateAsync(undefined);
+          navigate("/", { replace: true });
+        }
+      } catch (error) {
+        console.error("로그인 처리 실패:", error);
+        useAuthStore.getState().logout();
+        navigate("/login", { replace: true });
       }
-    } else {
-      console.error("로그인 토큰을 찾을 수 없습니다.");
-      navigate("/login", { replace: true });
-    }
+    };
+
+    finishLogin();
   }, [navigate, authLogin, searchParams]);
 
   return <LoadingSpinner />;

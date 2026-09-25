@@ -1,19 +1,11 @@
 import {
   GetUserProfileResponse,
-  PostRefreshRequest,
-  PostRefreshResponse,
   PutUserProfileRequset,
   PutUserProfileResponse,
 } from "@/types/login/loginApi.type";
 
 import instance from "@/apis/instance";
-
-export const postRefresh = async (
-  data: PostRefreshRequest
-): Promise<PostRefreshResponse> => {
-  const response = await instance.post("/token/access", data);
-  return response.data;
-};
+export { refreshAccessToken as postRefresh } from "@/apis/auth/refreshAccessToken";
 
 export const putUserProfile = async (
   data: PutUserProfileRequset

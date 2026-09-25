@@ -5,7 +5,7 @@ import TextareaAutosize from "react-textarea-autosize";
 interface FooterProps {
   isBuyer: boolean;
   isSending: boolean;
-  onSubmit: (text: string) => void;
+  onSubmit: (text: string) => boolean;
   onComplete: () => void;
 }
 
@@ -18,8 +18,7 @@ const Footer = ({ isBuyer, isSending, onSubmit, onComplete }: FooterProps) => {
       return;
     }
 
-    onSubmit(text);
-    setText("");
+    if (onSubmit(text)) setText("");
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {

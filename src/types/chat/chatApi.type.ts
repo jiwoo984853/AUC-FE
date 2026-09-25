@@ -16,6 +16,8 @@ export interface ChatMessageItem {
   sendAt: string;
   isRead: boolean;
   myMessage: boolean;
+  clientMessageId?: string;
+  deliveryStatus?: "pending" | "sent" | "failed";
 }
 
 export type ChatMesageList = ChatMessageItem[];

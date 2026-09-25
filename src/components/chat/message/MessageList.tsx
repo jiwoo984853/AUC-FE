@@ -4,9 +4,10 @@ import { useEffect, useRef } from "react";
 
 interface MessageListProps {
   messages: ChatMesageList;
+  onRemoveFailed: (clientMessageId: string) => void;
 }
 
-const MessageList = ({ messages }: MessageListProps) => {
+const MessageList = ({ messages, onRemoveFailed }: MessageListProps) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -16,7 +17,11 @@ const MessageList = ({ messages }: MessageListProps) => {
   return (
     <div className="flex-1 p-4 overflow-y-auto">
       {messages.map(msg => (
-        <MessageItem key={msg.messageId} msg={msg} />
+        <MessageItem
+          key={msg.clientMessageId || msg.messageId}
+          msg={msg}
+          onRemoveFailed={onRemoveFailed}
+        />
       ))}
       <div ref={messagesEndRef}></div>
     </div>

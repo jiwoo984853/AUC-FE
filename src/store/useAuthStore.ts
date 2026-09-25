@@ -1,64 +1,41 @@
 import { create } from "zustand";
-import { createJSONStorage, persist } from "zustand/middleware";
 
 type AuthStore = {
   userId: number | null;
   accessToken: string | null;
-  refreshToken: string | null;
   isLoggedIn: boolean;
-
-  login: (access: string, refresh: string) => void;
+  login: (accessToken: string) => void;
   logout: () => void;
-  setAccessToken: (token: string) => void;
+  setAccessToken: (accessToken: string) => void;
 };
 
-export const useAuthStore = create<AuthStore>()(
-  persist(
-    set => ({
-      userId: null,
-      accessToken: null,
-      refreshToken: null,
-      isLoggedIn: false,
+// 이전 버전에서 저장한 토큰도 브라우저에서 제거한다.
+if (typeof window !== "undefined") {
+  window.localStorage.removeItem("auth-storage");
+}
 
-      login: (access: string, refresh: string) => {
-        try {
-          const payload = JSON.parse(atob(access.split(".")[1]));
-          const userId = Number(payload.sub);
+const getUserId = (accessToken: string): number => {
+  const payload = JSON.parse(
+    atob(accessToken.split(".")[1].replace(/-/g, "+").replace(/_/g, "/"))
+  );
+  const userId = Number(payload.id);
+  if (!Number.isSafeInteger(userId) || userId <= 0) {
+    throw new Error("인증 토큰의 사용자 ID가 유효하지 않습니다.");
+  }
+  return userId;
+};
 
-          set({
-            userId,
-            accessToken: access,
-            refreshToken: refresh,
-            isLoggedIn: true,
-          });
-        } catch (err) {
-          console.error("JWT 파싱 실패:", err);
-        }
-      },
-
-      logout: () => {
-        set({
-          userId: null,
-          accessToken: null,
-          refreshToken: null,
-          isLoggedIn: false,
-        });
-      },
-
-      setAccessToken: (token: string) => {
-        set({ accessToken: token });
-      },
-    }),
-
-    {
-      name: "auth-storage",
-      storage: createJSONStorage(() => localStorage),
-      partialize: state => ({
-        userId: state.userId,
-        accessToken: state.accessToken,
-        refreshToken: state.refreshToken,
-        isLoggedIn: state.isLoggedIn,
-      }),
-    }
-  )
-);
+export const useAuthStore = create<AuthStore>()(set => ({
+  userId: null,
+  accessToken: null,
+  isLoggedIn: false,
+  login: accessToken => {
+    set({ userId: getUserId(accessToken), accessToken, isLoggedIn: true });
+  },
+  logout: () => {
+    set({ userId: null, accessToken: null, isLoggedIn: false });
+  },
+  setAccessToken: accessToken => {
+    set({ userId: getUserId(accessToken), accessToken, isLoggedIn: true });
+  },
+}));
