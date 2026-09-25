@@ -7,7 +7,7 @@ export const refreshAccessToken = (): Promise<PostRefreshResponse> => {
   if (!pendingRefresh) {
     pendingRefresh = axios
       .post<PostRefreshResponse>(
-        `${import.meta.env.VITE_SERVER_API_URL}/token/access`,
+        `${import.meta.env.VITE_AUTH_API_URL ?? import.meta.env.VITE_SERVER_API_URL}/token/access`,
         {},
         { withCredentials: true }
       )

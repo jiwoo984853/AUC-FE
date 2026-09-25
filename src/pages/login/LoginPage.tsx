@@ -1,6 +1,6 @@
 import { Kakao, Logo } from "@/assets/svgs/common";
 
-const KAKAO_AUTH_URL = `${import.meta.env.VITE_SERVER_API_URL}/oauth2/authorization/kakao`;
+const KAKAO_AUTH_URL = `${import.meta.env.VITE_AUTH_API_URL ?? import.meta.env.VITE_SERVER_API_URL}/oauth2/authorization/kakao`;
 
 const LoginPage = () => {
   const handleKakaoLogin = () => {
