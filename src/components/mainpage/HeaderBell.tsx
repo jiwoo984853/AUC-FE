@@ -10,7 +10,7 @@ export default function HeaderBell() {
     <header className="max-w-[360px] w-full z-10 mx-auto  py-4">
       <div className="flex items-center justify-between">
         {/* LOGO */}
-        <Logo className="h-auto w-[58px] ml-3" aria-label="LOGO" />
+        <Logo className="h-auto w-[58px] ml-3" aria-label="AUC" />
 
         {/* 알림 버튼 */}
         <div className="mr-3">

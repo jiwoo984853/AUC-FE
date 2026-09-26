@@ -5,4 +5,4 @@ export { default as ChevronLeft } from "./chevron-left.svg?react";
 export { default as Delete } from "./delete.svg?react";
 export { default as Kakao } from "./kakao.svg?react";
 export { default as Logo } from "./logo.svg?react";
-export { default as Plip } from "./plip.svg?react";
+export { default as Auc } from "./auc.svg?react";
