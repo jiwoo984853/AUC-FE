@@ -1,3 +1,6 @@
+import { postLogout } from "@/apis/auth/authApi";
+import { useAuthStore } from "@/store/useAuthStore";
+import { useQueryClient } from "@tanstack/react-query";
 import Footer from "@/components/common/Footer";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
 import AuctionList from "@/components/my/point/AuctionList";
@@ -12,6 +15,28 @@ import { useUserStore } from "@/store/useUserStore";
 import { useEffect, useState } from "react";
 
 const MyPage = () => {
+  const queryClient = useQueryClient();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [logoutError, setLogoutError] = useState("");
+
+  const handleLogout = async () => {
+    if (isLoggingOut) return;
+    setIsLoggingOut(true);
+    setLogoutError("");
+    try {
+      await postLogout();
+      await queryClient.cancelQueries();
+      queryClient.clear();
+      useUserStore.getState().clearUser();
+      useAuthStore.getState().logout();
+      // A full navigation also closes active WebSocket/SSE connections.
+      window.location.replace("/login");
+    } catch {
+      setLogoutError("로그아웃하지 못했어요. 잠시 후 다시 시도해 주세요.");
+      setIsLoggingOut(false);
+    }
+  };
+
   const [activeTab, setActiveTab] = useState<"ongoing" | "completed">(
     "ongoing"
   );
@@ -74,6 +99,22 @@ const MyPage = () => {
       <div className="flex-1 overflow-y-auto pb-20">
         {/* 프로필 */}
         <ProfileHeader name={userName} profileImage={userImage} />
+
+        <div className="px-6 py-3">
+          <button
+            type="button"
+            onClick={handleLogout}
+            disabled={isLoggingOut}
+            className="rounded-md border border-gray-300 px-4 py-2 text-sm text-gray-600 disabled:opacity-50"
+          >
+            {isLoggingOut ? "로그아웃 중…" : "로그아웃"}
+          </button>
+          {logoutError && (
+            <p role="alert" className="mt-2 text-sm text-red-600">
+              {logoutError}
+            </p>
+          )}
+        </div>
 
         {/* 포인트 카드 */}
         <PointCard amount={point} />

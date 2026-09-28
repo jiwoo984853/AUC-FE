@@ -1,6 +1,10 @@
 {
   "rewrites": [
     {
+      "source": "/api/auth/logout",
+      "destination": "https://auc-jiwoo984853.duckdns.org/api/auth/logout"
+    },
+    {
       "source": "/oauth2/:path*",
       "destination": "https://auc-jiwoo984853.duckdns.org/oauth2/:path*"
     },
