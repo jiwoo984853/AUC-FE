@@ -23,14 +23,11 @@ export const getUserProfile = async (): Promise<GetUserProfileResponse> => {
 };
 
 export const postLogout = async (): Promise<void> => {
-  // Refresh first so logout also works after the access token expires.
-  const { accessToken } = await refreshAccessToken();
   await axios.post(
     `${import.meta.env.VITE_AUTH_API_URL ?? import.meta.env.VITE_SERVER_API_URL}/api/auth/logout`,
     {},
     {
       withCredentials: true,
-      headers: { Authorization: `Bearer ${accessToken}` },
     }
   );
 };
