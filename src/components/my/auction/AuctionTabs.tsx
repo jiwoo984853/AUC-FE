@@ -12,12 +12,12 @@ const AuctionTabs = ({
   completedCount,
 }: AuctionTabsProps) => {
   return (
-    <div className="px-4 mt-6">
-      <div className="flex justify-between items-center my-3">
-        <p className="text-med18">내가 등록한 경매</p>
+    <div className="mt-4 px-4">
+      <div className="mb-3 flex justify-end">
         <button
+          type="button"
           onClick={() => (window.location.href = "/my/item/new")}
-          className="px-3 py-2 bg-bluegrey01 text-darkgrey05 text-med14 rounded-lg cursor-pointer"
+          className="cursor-pointer rounded-lg bg-bluegrey01 px-3 py-2 text-med14 text-darkgrey05"
         >
           + 새 경매 등록
         </button>

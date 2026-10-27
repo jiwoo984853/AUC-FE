@@ -3,6 +3,8 @@ import { useAuthStore } from "@/store/useAuthStore";
 import { useQueryClient } from "@tanstack/react-query";
 import Footer from "@/components/common/Footer";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
+import Bidding from "@/components/item/bid/bidding/Bidding";
+import WonBid from "@/components/item/bid/won/WonBid";
 import AuctionList from "@/components/my/point/AuctionList";
 import AuctionTabs from "@/components/my/auction/AuctionTabs";
 import PointCard from "@/components/my/point/PointCard";
@@ -10,11 +12,15 @@ import PointHistoryList from "@/components/my/point/PointHistoryList";
 import ProfileHeader from "@/components/my/profile/ProfileHeader";
 import { useMyAuctions } from "@/hooks/auction/useMyAuctionsApi";
 import { useAuthApi } from "@/hooks/auth/useAuthApi";
+import { useChatApi } from "@/hooks/chat/useChatApi";
+import { useBidApi } from "@/hooks/item/bid/useBidApi";
 import { usePointApi } from "@/hooks/my/charge/usePointApi";
 import { useUserStore } from "@/store/useUserStore";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const MyPage = () => {
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [logoutError, setLogoutError] = useState("");
@@ -40,10 +46,15 @@ const MyPage = () => {
   const [activeTab, setActiveTab] = useState<"ongoing" | "completed">(
     "ongoing"
   );
+  const [auctionCategory, setAuctionCategory] = useState<
+    "registered" | "participated"
+  >("registered");
 
   const { ongoing, completed, loading: auctionLoading } = useMyAuctions();
 
   const { getUserProfileMutation } = useAuthApi();
+  const { getAuctionSummaryQuery } = useBidApi();
+  const { postCreateChatRoomMutation } = useChatApi();
   const { getPointHisotryQuery } = usePointApi();
   const { data: PointHistoryData, isLoading: pointLoading } =
     getPointHisotryQuery();
@@ -55,6 +66,10 @@ const MyPage = () => {
   const userName = useUserStore(state => state.userName);
   const userImage = useUserStore(state => state.userImage);
   const point = useUserStore(state => state.point);
+  const userId = useUserStore(state => state.userId);
+  const { data: participatedItems, isLoading: participatedLoading } =
+    getAuctionSummaryQuery(userId);
+  const { mutate: createChatRoom } = postCreateChatRoomMutation();
   if (!userName || !userImage) {
     alert("로그인 정보가 없습니다.");
     return;
@@ -90,6 +105,34 @@ const MyPage = () => {
     imageUrls: a.imageUrls,
   }));
 
+  const handleChatClick = (auctionId: number) => {
+    const selectedItem = participatedItems?.wonItems.find(
+      item => item.auctionId === auctionId
+    );
+
+    createChatRoom(auctionId, {
+      onSuccess: res => {
+        navigate(`/chat/${res.chatRoomId}`, {
+          state: {
+            itemInfo: {
+              goodsName: selectedItem?.goodsName,
+              imageUrl: selectedItem?.imageUrl?.[0] || "",
+              finalPrice: selectedItem?.finalPrice,
+              sellerId: res.sellerId,
+              sellerNickname: res.sellerNickname,
+              buyerId: res.buyerId,
+              buyerNickname: res.buyerNickname,
+            },
+          },
+        });
+      },
+      onError: error => {
+        console.error("채팅방 생성 실패: ", error);
+        alert("채팅방 연결에 실패했습니다.");
+      },
+    });
+  };
+
   if (auctionLoading || pointLoading) {
     return <LoadingSpinner />;
   }
@@ -122,20 +165,60 @@ const MyPage = () => {
         {/* 포인트 내역 */}
         <PointHistoryList histories={PointHistoryData || []} />
 
-        {/* 탭 */}
-        <AuctionTabs
-          activeTab={activeTab}
-          setActiveTab={setActiveTab}
-          ongoingCount={ongoingItems.length}
-          completedCount={completedItems.length}
-        />
+        <section className="mt-6">
+          <div className="mx-4 flex border-b border-bluegrey02">
+            <button
+              type="button"
+              onClick={() => setAuctionCategory("registered")}
+              className={`flex-1 cursor-pointer py-3 text-center text-med16 ${
+                auctionCategory === "registered"
+                  ? "border-b-2 border-darkgrey05 text-darkgrey05"
+                  : "text-bluegrey07"
+              }`}
+            >
+              내가 등록한 경매
+            </button>
+            <button
+              type="button"
+              onClick={() => setAuctionCategory("participated")}
+              className={`flex-1 cursor-pointer py-3 text-center text-med16 ${
+                auctionCategory === "participated"
+                  ? "border-b-2 border-darkgrey05 text-darkgrey05"
+                  : "text-bluegrey07"
+              }`}
+            >
+              내가 참여한 경매
+            </button>
+          </div>
 
-        {/* 리스트 */}
-        <AuctionList
-          activeTab={activeTab}
-          ongoingItems={ongoingItems}
-          completedItems={completedItems}
-        />
+          {auctionCategory === "registered" ? (
+            <>
+              <AuctionTabs
+                activeTab={activeTab}
+                setActiveTab={setActiveTab}
+                ongoingCount={ongoingItems.length}
+                completedCount={completedItems.length}
+              />
+              <AuctionList
+                activeTab={activeTab}
+                ongoingItems={ongoingItems}
+                completedItems={completedItems}
+              />
+            </>
+          ) : participatedLoading ? (
+            <div className="py-10">
+              <LoadingSpinner />
+            </div>
+          ) : (
+            <div className="mt-3 flex flex-col gap-2 bg-grey02">
+              <WonBid
+                wonItems={participatedItems?.wonItems || []}
+                onChat={handleChatClick}
+              />
+              <Bidding biddingItems={participatedItems?.bidItems || []} />
+            </div>
+          )}
+        </section>
       </div>
 
       <Footer />
