@@ -7,7 +7,7 @@ import AuctionDeliverySection from "@/components/my/newAuctionForm/AuctionDelive
 import AuctionDropdown from "@/components/my/newAuctionForm/AuctionDropdown";
 import AuctionImageUploader from "@/components/my/newAuctionForm/AuctionImageUploader";
 import AuctionTimeSection from "@/components/my/newAuctionForm/AuctionTimeSection";
-import { categories } from "@/constants/category";
+import { useCategoriesApi } from "@/hooks/category/useCategoriesApi";
 import {
   conditionMap,
   conditions,
@@ -41,6 +41,8 @@ const NewAuctionPage = () => {
 
   const { uploadImages } = useImageUpload();
   const { submitAuction } = useCreateAuction();
+  const { data: categoryOptions = [], isError: isCategoryError } =
+    useCategoriesApi();
 
   const [images, setImages] = useState<(File | null)[]>([null, null, null]);
   const [title, setTitle] = useState("");
@@ -112,6 +114,15 @@ const NewAuctionPage = () => {
       openAlert("내용을 모두 입력해주세요.", false);
       return;
     }
+
+    const selectedCategory = categoryOptions.find(
+      item => item.categoryName === category
+    );
+    if (!selectedCategory) {
+      openAlert("유효한 카테고리를 선택해주세요.", false);
+      return;
+    }
+
     const fileList = images.filter((f): f is File => f !== null);
     if (fileList.length === 0) {
       openAlert("최소 1장의 이미지를 등록해주세요.", false);
@@ -120,9 +131,6 @@ const NewAuctionPage = () => {
 
     try {
       const uploadedUrls = await uploadImages(fileList);
-
-      const selected = categories.find(c => c.name === category);
-      const categoryId = selected ? [selected.id] : [];
 
       const body: CreateAuctionRequest = {
         goodsName: title,
@@ -135,14 +143,14 @@ const NewAuctionPage = () => {
         manufactureYear: year,
         location: location,
         imageUrls: uploadedUrls,
-        categoryIds: categoryId,
+        categoryIds: [selectedCategory.categoryId],
         hideBidPrice: hideBid,
       };
 
       await submitAuction(body);
 
       openAlert("새 경매 등록이 완료되었습니다!", true);
-    } catch (error) {
+    } catch {
       openAlert("등록 중 오류가 발생했습니다.", false);
     }
   };
@@ -204,8 +212,13 @@ const NewAuctionPage = () => {
               label="카테고리"
               value={category}
               onChange={setCategory}
-              options={categories.map(c => c.name)}
+              options={categoryOptions.map(item => item.categoryName)}
             />
+            {isCategoryError && (
+              <p className="-mt-3 mb-4 text-reg12 text-red-500">
+                카테고리 목록을 불러오지 못했습니다.
+              </p>
+            )}
             <AuctionDropdown
               label="상태"
               value={condition}

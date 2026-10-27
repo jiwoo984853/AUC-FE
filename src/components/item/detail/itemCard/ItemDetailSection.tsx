@@ -19,7 +19,7 @@ const ItemsDetailSection = ({ item }: AuctionDetailProps) => (
       <div>
         <h5 className="text-reg14 text-bluegrey08">카테고리</h5>
         <p className="text-med14 text-bluegrey10">
-          {item.categories[0].categoryName}
+          {item.categories?.[0]?.categoryName ?? "카테고리 정보 없음"}
         </p>
       </div>
       <div>
