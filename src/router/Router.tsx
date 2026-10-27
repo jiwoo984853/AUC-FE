@@ -38,6 +38,7 @@ const PaymentSuccessPage = lazy(
   () => import("@/pages/my/charge/PaymentSuccessPage")
 );
 const MyPage = lazy(() => import("@/pages/my/MyPage"));
+const EditProfilePage = lazy(() => import("@/pages/my/EditProfilePage"));
 const NewAutionPage = lazy(() => import("@/pages/my/NewAutionPage"));
 const PointInquiryPage = lazy(() => import("@/pages/my/PointInquiryPage"));
 
@@ -101,6 +102,7 @@ export const router = createBrowserRouter([
           { path: "chat/:id", element: <ChatPage /> },
           { path: "alarm", element: <AlarmPage /> },
           { path: "my/points", element: <PointInquiryPage /> },
+          { path: "my/profile", element: <EditProfilePage /> },
           { path: "my/points/charge", element: <ChargePointPage /> },
           { path: "my/item/new", element: <NewAutionPage /> },
           { path: "/payment/success", element: <PaymentSuccessPage /> },

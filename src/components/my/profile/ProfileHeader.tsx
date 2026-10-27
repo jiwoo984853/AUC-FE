@@ -1,5 +1,6 @@
 import defaultProfileImage from "@/assets/images/profile/default-profile.png";
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 
 interface ProfileHeaderProps {
   name: string;
@@ -34,6 +35,12 @@ const ProfileHeader = ({ name, profileImage }: ProfileHeaderProps) => {
           <p className="text-semibold20 text-darkgrey05">{name}</p>
         </div>
       </div>
+      <Link
+        to="/my/profile"
+        className="rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-600"
+      >
+        내 정보 수정
+      </Link>
     </div>
   );
 };

@@ -7,7 +7,7 @@ export interface PostRefreshResponse {
 }
 
 export interface PutUserProfileRequset {
-  profileImageUrl: string;
+  profileImageUrl?: string;
   nickname: string;
 }
 
