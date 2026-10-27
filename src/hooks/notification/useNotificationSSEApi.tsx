@@ -89,6 +89,41 @@ export default function useNotificationSSE() {
       }
     });
 
+    eventSource.addEventListener("auction-cancelled", (e: Event) => {
+      const event = e as MessageEvent;
+      try {
+        const data = JSON.parse(event.data);
+
+        const newAlarm: AlarmItem = {
+          id: Date.now(),
+          message: data.message,
+          auctionId: data.auctionId || 0,
+          type: "AUCTION_CANCELLED",
+          isRead: false,
+          createdAt: new Date().toISOString(),
+          timeLabel: "방금 전",
+          typeLabel: "경매 취소",
+        };
+        addAlarm(newAlarm);
+
+        toast.custom(
+          t => (
+            <NotificationToast
+              t={t}
+              message={data.message}
+              type="AUCTION_CANCELLED"
+            />
+          ),
+          {
+            position: "top-center",
+            duration: 10000,
+          }
+        );
+      } catch (err) {
+        console.error("AUCTION_CANCELLED 이벤트 파싱 에러:", err);
+      }
+    });
+
     eventSource.onerror = err => {
       console.error("SSE error →", err);
       if (eventSource.readyState === EventSource.CLOSED) {

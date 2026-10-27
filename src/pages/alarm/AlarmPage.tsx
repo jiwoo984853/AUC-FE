@@ -8,6 +8,7 @@ import LoadingSpinner from "@/components/common/LoadingSpinner";
 import { useNotificationList } from "@/hooks/notification/useNotificationApi";
 import { useNotificationStore } from "@/store/useNotificationStore";
 import { formatTimeAgo } from "@/utils/dateUtils";
+import { NotificationType } from "@/types/alarm/notificationApi.type";
 
 const AlarmPage = () => {
   const navigate = useNavigate();
@@ -15,13 +16,16 @@ const AlarmPage = () => {
   const { data: notifications, isLoading } = useNotificationList();
   const { setAlarms, resetUnread, alarms } = useNotificationStore();
 
-  const typeLabel = (t: "OUTBID" | "WIN" | "FAIL") => {
-    return t === "OUTBID" ? "상위 입찰" : "낙찰 종료";
+  const typeLabel = (type: NotificationType) => {
+    if (type === "OUTBID") return "상위 입찰";
+    if (type === "WIN") return "낙찰 성공";
+    if (type === "AUCTION_CANCELLED") return "경매 취소";
+    if (type === "NEXT_WINNER_OFFER") return "구매 제안";
+    return "경매 종료";
   };
 
-  const getTypeIcon = (t: "OUTBID" | "WIN" | "FAIL") => {
-    console.log(t);
-    return t === "OUTBID" ? AlarmUp : AlarmLogo;
+  const getTypeIcon = (type: NotificationType) => {
+    return type === "OUTBID" ? AlarmUp : AlarmLogo;
   };
 
   useEffect(() => {

@@ -37,5 +37,10 @@ export const useMyAuctions = () => {
     fetchData();
   }, []);
 
-  return { ongoing, completed, loading, error };
+  const removeAuction = (auctionId: number) => {
+    setOngoing(items => items.filter(item => item.id !== auctionId));
+    setCompleted(items => items.filter(item => item.id !== auctionId));
+  };
+
+  return { ongoing, completed, loading, error, removeAuction };
 };

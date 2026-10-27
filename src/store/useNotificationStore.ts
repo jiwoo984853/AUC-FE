@@ -1,11 +1,12 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { NotificationType } from "@/types/alarm/notificationApi.type";
 
 export type AlarmItem = {
   id: number;
   message: string;
   auctionId: number;
-  type: "OUTBID" | "WIN" | "FAIL";
+  type: NotificationType;
   isRead: boolean;
   createdAt: string;
 

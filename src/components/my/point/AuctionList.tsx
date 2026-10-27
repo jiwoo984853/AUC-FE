@@ -16,12 +16,16 @@ interface AuctionListProps {
   activeTab: "ongoing" | "completed";
   ongoingItems: AuctionItem[];
   completedItems: AuctionItem[];
+  deletingAuctionId: number | null;
+  onDelete: (item: AuctionItem) => void;
 }
 
 const AuctionList = ({
   activeTab,
   ongoingItems,
   completedItems,
+  deletingAuctionId,
+  onDelete,
 }: AuctionListProps) => {
   const navigate = useNavigate();
   const list = activeTab === "ongoing" ? ongoingItems : completedItems;
@@ -36,7 +40,7 @@ const AuctionList = ({
   };
 
   return (
-    <div className="bg-white mx-4 mt-3 rounded-xl p-4">
+    <div className="mx-4 mt-3 rounded-xl bg-white p-4">
       {list.length === 0 ? (
         <p className="text-sm text-bluegrey07 text-center py-6">
           등록된 경매가 없습니다.
@@ -47,8 +51,19 @@ const AuctionList = ({
             <div
               key={item.id}
               onClick={() => navigate(`/item/${item.id}`)}
-              className="flex items-center gap-4 border border-bluegrey02 rounded-xl px-4 py-3 hover:shadow-sm transition cursor-pointer active:bg-grey01"
+              className="relative flex cursor-pointer items-center gap-4 rounded-xl border border-bluegrey02 px-4 py-3 transition hover:shadow-sm active:bg-grey01"
             >
+              <button
+                type="button"
+                disabled={deletingAuctionId === item.id}
+                onClick={event => {
+                  event.stopPropagation();
+                  onDelete(item);
+                }}
+                className="absolute right-3 top-3 z-10 text-reg12 text-red-500 disabled:text-grey08"
+              >
+                {deletingAuctionId === item.id ? "삭제 중…" : "삭제"}
+              </button>
               {/* 왼쪽 상품 이미지 */}
               <div className="w-[72px] h-[72px] rounded-lg flex-shrink-0 overflow-hidden">
                 <img
@@ -59,7 +74,7 @@ const AuctionList = ({
               </div>
 
               {/* 오른쪽 상품 정보 */}
-              <div className="flex flex-col flex-1 justify-center">
+              <div className="flex flex-1 flex-col justify-center pr-10">
                 <p className="text-reg14 text-darkgrey05 mb-[2px]">
                   {item.title}
                 </p>
@@ -90,6 +105,11 @@ const AuctionList = ({
             </div>
           ))}
         </div>
+      )}
+      {activeTab === "completed" && (
+        <p className="pt-4 text-center text-reg12 text-darkgrey01">
+          등록자가 삭제한 경매는 나타나지 않습니다.
+        </p>
       )}
     </div>
   );

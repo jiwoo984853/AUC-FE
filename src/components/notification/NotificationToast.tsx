@@ -6,7 +6,7 @@ import { Toast, toast } from "react-hot-toast";
 interface NotificationToastProps {
   t: Toast;
   message: string;
-  type: "WIN" | "OUTBID";
+  type: "WIN" | "OUTBID" | "AUCTION_CANCELLED";
 }
 
 export default function NotificationToast({
@@ -15,6 +15,11 @@ export default function NotificationToast({
   type,
 }: NotificationToastProps) {
   const isWin = type === "WIN";
+  const title = isWin
+    ? "낙찰 성공!"
+    : type === "AUCTION_CANCELLED"
+      ? "경매 취소"
+      : "입찰 알림";
 
   return (
     <div
@@ -36,9 +41,7 @@ export default function NotificationToast({
         )}
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-bold14 text-mainpink">
-          {isWin ? "낙찰 성공!" : "입찰 알림"}
-        </p>
+        <p className="text-bold14 text-mainpink">{title}</p>
         <p className="mt-1 text-reg14 text-darkgrey02">{message}</p>
       </div>
       <button

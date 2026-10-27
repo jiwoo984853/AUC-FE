@@ -1,8 +1,10 @@
 import { postLogout } from "@/apis/auth/authApi";
+import { deleteMyAuction } from "@/apis/my/myAuctionApi";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useQueryClient } from "@tanstack/react-query";
 import Footer from "@/components/common/Footer";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
+import ConfirmModal from "@/components/common/ConfirmModal";
 import Bidding from "@/components/item/bid/bidding/Bidding";
 import WonBid from "@/components/item/bid/won/WonBid";
 import AuctionList from "@/components/my/point/AuctionList";
@@ -18,12 +20,25 @@ import { usePointApi } from "@/hooks/my/charge/usePointApi";
 import { useUserStore } from "@/store/useUserStore";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { AxiosError } from "axios";
+
+interface DeletableAuction {
+  id: number;
+  title: string;
+  status: string;
+}
 
 const MyPage = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [logoutError, setLogoutError] = useState("");
+  const [auctionToDelete, setAuctionToDelete] =
+    useState<DeletableAuction | null>(null);
+  const [deletingAuctionId, setDeletingAuctionId] = useState<number | null>(
+    null
+  );
+  const [deleteError, setDeleteError] = useState("");
 
   const handleLogout = async () => {
     if (isLoggingOut) return;
@@ -50,7 +65,12 @@ const MyPage = () => {
     "registered" | "participated"
   >("registered");
 
-  const { ongoing, completed, loading: auctionLoading } = useMyAuctions();
+  const {
+    ongoing,
+    completed,
+    loading: auctionLoading,
+    removeAuction,
+  } = useMyAuctions();
 
   const { getUserProfileMutation } = useAuthApi();
   const { getAuctionSummaryQuery } = useBidApi();
@@ -133,6 +153,32 @@ const MyPage = () => {
     });
   };
 
+  const handleDeleteAuction = async () => {
+    if (!auctionToDelete || deletingAuctionId !== null) return;
+
+    const target = auctionToDelete;
+    setDeletingAuctionId(target.id);
+    setDeleteError("");
+
+    try {
+      await deleteMyAuction(target.id);
+      removeAuction(target.id);
+      setAuctionToDelete(null);
+    } catch (error) {
+      let message = "경매를 삭제하지 못했어요. 잠시 후 다시 시도해 주세요.";
+      if (error instanceof AxiosError) {
+        const data = error.response?.data as {
+          message?: string;
+          error?: string;
+        };
+        message = data?.message || data?.error || message;
+      }
+      setDeleteError(message);
+    } finally {
+      setDeletingAuctionId(null);
+    }
+  };
+
   if (auctionLoading || pointLoading) {
     return <LoadingSpinner />;
   }
@@ -203,6 +249,8 @@ const MyPage = () => {
                 activeTab={activeTab}
                 ongoingItems={ongoingItems}
                 completedItems={completedItems}
+                deletingAuctionId={deletingAuctionId}
+                onDelete={setAuctionToDelete}
               />
             </>
           ) : participatedLoading ? (
@@ -222,6 +270,30 @@ const MyPage = () => {
       </div>
 
       <Footer />
+
+      <ConfirmModal
+        isOpen={auctionToDelete !== null}
+        onClose={() => {
+          if (deletingAuctionId === null) {
+            setAuctionToDelete(null);
+            setDeleteError("");
+          }
+        }}
+        onConfirm={handleDeleteAuction}
+        title="경매를 삭제하시겠습니까?"
+        confirmText={deletingAuctionId === null ? "삭제할래요" : "삭제 중…"}
+      >
+        <p>
+          {auctionToDelete?.status === "경매중"
+            ? "진행 중인 경매를 삭제하면 입찰자의 보증금이 환불되고 취소 알림이 전송됩니다."
+            : "거래 완료 목록에서 이 경매가 보이지 않게 됩니다."}
+        </p>
+        {deleteError && (
+          <p role="alert" className="mt-3 text-reg12 text-red-500">
+            {deleteError}
+          </p>
+        )}
+      </ConfirmModal>
     </div>
   );
 };
