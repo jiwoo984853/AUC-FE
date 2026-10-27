@@ -1,4 +1,4 @@
-name: Build & Deploy to https://github.com/BeJunseok/Dopamine-FE
+name: Build & Deploy to https://github.com/jiwoo984853/Dopamine-FE
 
 on:
   push:
@@ -24,7 +24,7 @@ jobs:
           API_TOKEN_GITHUB: ${{ secrets.AUTO_ACTIONS }}
         with:
           source-directory: 'output'
-          destination-github-username: BeJunseok
+          destination-github-username: jiwoo984853
           destination-repository-name: Dopamine-FE
           user-email: ${{ secrets.EMAIL }}
           commit-message: "Deploy: ${{ github.event.head_commit.message }} (${{ github.sha }})"
