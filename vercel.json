@@ -17,8 +17,8 @@
       "destination": "https://auc-jiwoo984853.duckdns.org/token/:path*"
     },
     {
-      "source": "/(.*)",
-      "destination": "/"
+      "source": "/((?!assets/).*)",
+      "destination": "/index.html"
     }
   ]
 }
