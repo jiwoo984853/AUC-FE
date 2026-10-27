@@ -1,11 +1,20 @@
 import {
   getChatMessage,
+  getChatRooms,
   postChatComplete,
   postCreateChatRoom,
 } from "@/apis/chat/chatApi";
 import { useMutation, useQuery } from "@tanstack/react-query";
 
 export const useChatApi = () => {
+  const getChatRoomsQuery = (enabled = true) => {
+    return useQuery({
+      queryKey: ["chatRooms"],
+      queryFn: getChatRooms,
+      enabled,
+    });
+  };
+
   const postCreateChatRoomMutation = () => {
     return useMutation({
       mutationFn: postCreateChatRoom,
@@ -27,6 +36,7 @@ export const useChatApi = () => {
   };
 
   return {
+    getChatRoomsQuery,
     postCreateChatRoomMutation,
     postChatCompleteMutation,
     getChatMessageQuery,

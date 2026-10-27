@@ -27,25 +27,45 @@ const ChatPage = () => {
     return () => timers.forEach(timer => clearTimeout(timer));
   }, []);
 
-  const itemInfo = location.state?.itemInfo;
-
-  useEffect(() => {
-    if (!itemInfo) {
-      alert("잘못된 접근입니다.");
-      navigate("/items", { replace: true });
-    }
-  }, [itemInfo, navigate]);
-
   const userId = useUserStore(state => state.userId);
   const userName = useUserStore(state => state.userName);
   const userImage = useUserStore(state => state.userImage);
+
+  const locationItemInfo = location.state?.itemInfo;
+  const { getChatMessageQuery, getChatRoomsQuery, postChatCompleteMutation } =
+    useChatApi();
+  const {
+    data: chatRooms,
+    isLoading: isChatRoomsLoading,
+    isFetched: isChatRoomsFetched,
+  } = getChatRoomsQuery(!locationItemInfo);
+  const currentRoom = chatRooms?.find(room => room.chatRoomId === roomId);
+  const itemInfo =
+    locationItemInfo ||
+    (currentRoom
+      ? {
+          goodsName: currentRoom.goodsName,
+          imageUrl: currentRoom.imageUrl || "",
+          finalPrice: currentRoom.finalPrice,
+          sellerId: currentRoom.sellerId,
+          sellerNickname: currentRoom.sellerNickname,
+          buyerId: currentRoom.buyerId,
+          buyerNickname: currentRoom.buyerNickname,
+        }
+      : undefined);
+
+  useEffect(() => {
+    if (!locationItemInfo && isChatRoomsFetched && !itemInfo) {
+      alert("접근할 수 없는 채팅방입니다.");
+      navigate("/chats", { replace: true });
+    }
+  }, [isChatRoomsFetched, itemInfo, locationItemInfo, navigate]);
 
   const isBuyer = itemInfo ? userId === itemInfo.buyerId : false;
   const opponentName = isBuyer
     ? itemInfo?.sellerNickname
     : itemInfo?.buyerNickname;
 
-  const { getChatMessageQuery, postChatCompleteMutation } = useChatApi();
   const { data: initialChatMessages, isLoading } = getChatMessageQuery(roomId);
 
   const [realTimeMessages, setRealTimeMessages] = useState<ChatMesageList>([]);
@@ -183,6 +203,8 @@ const ChatPage = () => {
       },
     });
   };
+
+  if (!itemInfo && isChatRoomsLoading) return <LoadingSpinner />;
 
   if (!itemInfo) return null;
 

@@ -1,8 +1,14 @@
 import instance from "@/apis/instance";
 import {
   ChatMesageList,
+  ChatRoomListItem,
   CreateChatRoomResponse,
 } from "@/types/chat/chatApi.type";
+
+export const getChatRooms = async (): Promise<ChatRoomListItem[]> => {
+  const response = await instance.get("/api/chat/rooms");
+  return response.data;
+};
 
 export const postCreateChatRoom = async (
   auctionId: number

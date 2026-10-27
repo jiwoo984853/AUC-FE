@@ -1,7 +1,7 @@
 import clsx from "clsx";
 import { NavLink, useLocation } from "react-router-dom";
 
-import { Home, Item, My, Search } from "@/assets/svgs/layouts";
+import { Chat, Home, Item, My, Search } from "@/assets/svgs/layouts";
 
 const menuData = [
   {
@@ -20,6 +20,12 @@ const menuData = [
       "/search/category-result",
       "/search",
     ],
+  },
+  {
+    name: "채팅",
+    icon: Chat,
+    to: "/chats",
+    activePaths: ["/chats"],
   },
   {
     name: "입찰물품",

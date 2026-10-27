@@ -47,6 +47,7 @@ const AlarmPage = lazy(() => import("@/pages/alarm/AlarmPage"));
 
 // 기타
 const ChatPage = lazy(() => import("@/pages/chat/ChatPage"));
+const ChatListPage = lazy(() => import("@/pages/chat/ChatListPage"));
 const NotFoundPage = lazy(() => import("@/pages/notFound/NotFoundPage"));
 const RequireAuth = lazy(() => import("@/router/RequireAuth"));
 
@@ -75,6 +76,7 @@ export const router = createBrowserRouter([
             children: [
               { index: true, element: <HomePage /> },
               { path: "items", element: <BidItemPage /> },
+              { path: "chats", element: <ChatListPage /> },
               { path: "search", element: <SearchPage /> },
               { path: "search/result", element: <SearchResultPage /> },
               {

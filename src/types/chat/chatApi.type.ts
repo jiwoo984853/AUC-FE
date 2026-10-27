@@ -7,6 +7,23 @@ export interface CreateChatRoomResponse {
   buyerNickname: string;
 }
 
+export interface ChatRoomListItem {
+  chatRoomId: number;
+  auctionId: number;
+  goodsName: string;
+  imageUrl: string | null;
+  finalPrice: number;
+  sellerId: number;
+  sellerNickname: string;
+  buyerId: number;
+  buyerNickname: string;
+  opponentNickname: string;
+  opponentProfileImageUrl: string | null;
+  lastMessage: string | null;
+  lastMessageAt: string | null;
+  unreadCount: number;
+}
+
 export interface ChatMessageItem {
   messageId: number;
   senderId: number;
