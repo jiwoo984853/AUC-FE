@@ -109,6 +109,7 @@ const MyPage = () => {
       title: a.title,
       price: a.currentPrice,
       status: "경매중",
+      canDelete: true,
 
       imageUrls: a.imageUrls,
 
@@ -116,14 +117,23 @@ const MyPage = () => {
     };
   });
 
-  const completedItems = completed.map(a => ({
-    id: a.id,
-    title: a.title,
-    price: a.currentPrice,
-    status: "거래 완료",
+  const completedItems = completed.map(a => {
+    const isPaymentCompleted = a.paymentStatus === "COMPLETED";
+    const isTransactionPending = a.hasWinner && !isPaymentCompleted;
 
-    imageUrls: a.imageUrls,
-  }));
+    return {
+      id: a.id,
+      title: a.title,
+      price: a.currentPrice,
+      status: isPaymentCompleted
+        ? "거래 완료"
+        : isTransactionPending
+          ? "거래 진행 중"
+          : "경매 종료",
+      canDelete: !isTransactionPending,
+      imageUrls: a.imageUrls,
+    };
+  });
 
   const handleChatClick = (auctionId: number) => {
     const selectedItem = participatedItems?.wonItems.find(

@@ -10,6 +10,8 @@ export interface MyAuctionItem {
 
   endAt: string;
   status: string;
+  paymentStatus?: "PENDING" | "COMPLETED";
+  hasWinner?: boolean;
 
   timeLeft?: {
     hours: number;

@@ -5,6 +5,7 @@ interface AuctionItem {
   title: string;
   price: number;
   status: string;
+  canDelete: boolean;
   imageUrls: string[];
   timeLeft?: {
     hours: number;
@@ -53,17 +54,19 @@ const AuctionList = ({
               onClick={() => navigate(`/item/${item.id}`)}
               className="relative flex cursor-pointer items-center gap-4 rounded-xl border border-bluegrey02 px-4 py-3 transition hover:shadow-sm active:bg-grey01"
             >
-              <button
-                type="button"
-                disabled={deletingAuctionId === item.id}
-                onClick={event => {
-                  event.stopPropagation();
-                  onDelete(item);
-                }}
-                className="absolute right-3 top-3 z-10 text-reg12 text-red-500 disabled:text-grey08"
-              >
-                {deletingAuctionId === item.id ? "삭제 중…" : "삭제"}
-              </button>
+              {item.canDelete && (
+                <button
+                  type="button"
+                  disabled={deletingAuctionId === item.id}
+                  onClick={event => {
+                    event.stopPropagation();
+                    onDelete(item);
+                  }}
+                  className="absolute right-3 top-3 z-10 text-reg12 text-red-500 disabled:text-grey08"
+                >
+                  {deletingAuctionId === item.id ? "삭제 중…" : "삭제"}
+                </button>
+              )}
               {/* 왼쪽 상품 이미지 */}
               <div className="w-[72px] h-[72px] rounded-lg flex-shrink-0 overflow-hidden">
                 <img
@@ -74,7 +77,11 @@ const AuctionList = ({
               </div>
 
               {/* 오른쪽 상품 정보 */}
-              <div className="flex flex-1 flex-col justify-center pr-10">
+              <div
+                className={`flex flex-1 flex-col justify-center ${
+                  item.canDelete ? "pr-10" : ""
+                }`}
+              >
                 <p className="text-reg14 text-darkgrey05 mb-[2px]">
                   {item.title}
                 </p>
@@ -98,7 +105,7 @@ const AuctionList = ({
                   <p className="text-reg12 text-darkgrey02 whitespace-nowrap">
                     {activeTab === "ongoing"
                       ? formatTimeLeft(item.timeLeft)
-                      : "거래 완료"}
+                      : item.status}
                   </p>
                 </div>
               </div>
