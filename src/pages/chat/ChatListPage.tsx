@@ -45,6 +45,7 @@ const ChatListPage = () => {
                         sellerNickname: room.sellerNickname,
                         buyerId: room.buyerId,
                         buyerNickname: room.buyerNickname,
+                        paymentStatus: room.paymentStatus,
                       },
                     },
                   })

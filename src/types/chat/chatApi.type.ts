@@ -5,6 +5,7 @@ export interface CreateChatRoomResponse {
   sellerNickname: string;
   buyerId: number;
   buyerNickname: string;
+  paymentStatus: "PENDING" | "COMPLETED";
 }
 
 export interface ChatRoomListItem {
@@ -13,6 +14,7 @@ export interface ChatRoomListItem {
   goodsName: string;
   imageUrl: string | null;
   finalPrice: number;
+  paymentStatus: "PENDING" | "COMPLETED";
   sellerId: number;
   sellerNickname: string;
   buyerId: number;

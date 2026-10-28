@@ -5,9 +5,15 @@ interface HeaderProps {
   opponentName: string;
   goodsName: string;
   imageUrl: string;
+  isTransactionCompleted: boolean;
 }
 
-const Header = ({ opponentName, goodsName, imageUrl }: HeaderProps) => {
+const Header = ({
+  opponentName,
+  goodsName,
+  imageUrl,
+  isTransactionCompleted,
+}: HeaderProps) => {
   const navigate = useNavigate();
 
   const handleBack = () => {
@@ -42,7 +48,9 @@ const Header = ({ opponentName, goodsName, imageUrl }: HeaderProps) => {
           <div className="px-2 py-1 rounded-full text-med13 text-mainpink bg-lightpink">
             낙찰 성공
           </div>
-          <p className="text-reg12 text-bluegrey08">결제 대기중</p>
+          <p className="text-reg12 text-bluegrey08">
+            {isTransactionCompleted ? "결제 완료" : "결제 대기중"}
+          </p>
         </div>
       </div>
     </div>

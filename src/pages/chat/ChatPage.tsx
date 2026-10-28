@@ -7,6 +7,7 @@ import { useChatApi } from "@/hooks/chat/useChatApi";
 import { useStompClient } from "@/hooks/chat/useStompClientApi";
 import { useUserStore } from "@/store/useUserStore";
 import { ChatMesageList, ChatMessageItem } from "@/types/chat/chatApi.type";
+import { AxiosError } from "axios";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 
@@ -51,6 +52,7 @@ const ChatPage = () => {
           sellerNickname: currentRoom.sellerNickname,
           buyerId: currentRoom.buyerId,
           buyerNickname: currentRoom.buyerNickname,
+          paymentStatus: currentRoom.paymentStatus,
         }
       : undefined);
 
@@ -65,6 +67,7 @@ const ChatPage = () => {
   const opponentName = isBuyer
     ? itemInfo?.sellerNickname
     : itemInfo?.buyerNickname;
+  const isTransactionCompleted = itemInfo?.paymentStatus === "COMPLETED";
 
   const { data: initialChatMessages, isLoading } = getChatMessageQuery(roomId);
 
@@ -198,7 +201,20 @@ const ChatPage = () => {
       },
       onError: error => {
         console.error("거래 완료 실패: ", error);
-        alert("거래 완료 처리에 실패했습니다.");
+        const responseData =
+          error instanceof AxiosError
+            ? (error.response?.data as {
+                message?: string;
+                detail?: string;
+                error?: string;
+              })
+            : undefined;
+        alert(
+          responseData?.message ||
+            responseData?.detail ||
+            responseData?.error ||
+            "거래 완료 처리에 실패했습니다."
+        );
         setModalOpen(false);
       },
     });
@@ -218,6 +234,7 @@ const ChatPage = () => {
         opponentName={opponentName}
         goodsName={itemInfo.goodsName}
         imageUrl={itemInfo.imageUrl}
+        isTransactionCompleted={isTransactionCompleted}
       />
       <MessageList
         messages={disaplayMessages}
@@ -226,6 +243,7 @@ const ChatPage = () => {
       <Footer
         isBuyer={isBuyer}
         isSending={isSending}
+        isTransactionCompleted={isTransactionCompleted}
         onSubmit={handleMessageSubmit}
         onComplete={() => setModalOpen(true)}
       />

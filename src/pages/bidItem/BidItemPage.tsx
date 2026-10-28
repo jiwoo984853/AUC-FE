@@ -34,6 +34,7 @@ const BidItemPage = () => {
               sellerNickname: res.sellerNickname,
               buyerId: res.buyerId,
               buyerNickname: res.buyerNickname,
+              paymentStatus: res.paymentStatus,
             },
           },
         });

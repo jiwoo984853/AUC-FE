@@ -5,11 +5,18 @@ import TextareaAutosize from "react-textarea-autosize";
 interface FooterProps {
   isBuyer: boolean;
   isSending: boolean;
+  isTransactionCompleted: boolean;
   onSubmit: (text: string) => boolean;
   onComplete: () => void;
 }
 
-const Footer = ({ isBuyer, isSending, onSubmit, onComplete }: FooterProps) => {
+const Footer = ({
+  isBuyer,
+  isSending,
+  isTransactionCompleted,
+  onSubmit,
+  onComplete,
+}: FooterProps) => {
   const [text, setText] = useState("");
 
   const handleSubmit = () => {
@@ -41,7 +48,7 @@ const Footer = ({ isBuyer, isSending, onSubmit, onComplete }: FooterProps) => {
 
   return (
     <div className="sticky bottom-0 w-full z-50">
-      {isBuyer && (
+      {isBuyer && !isTransactionCompleted && (
         <div className="flex items-center justify-between px-3 py-2 border-t border-grey04 bg-white">
           <p className="text-reg12 text-darkgrey01">
             거래가 무사히 성사되면
