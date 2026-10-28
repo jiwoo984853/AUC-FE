@@ -48,9 +48,13 @@ export const useItemBid = (currentPrice: number, auctionId: number) => {
             { onError: err => console.error("입찰 상태 기록 실패:", err) }
           );
         },
-        onError: (err: AxiosError<{ message: string }>) => {
+        onError: (err: AxiosError<{ message?: string; detail?: string }>) => {
           bidInFlight.current = false;
-          alert(err.response?.data.message || "입찰 도중 오류가 발생했습니다.");
+          alert(
+            err.response?.data.message ||
+              err.response?.data.detail ||
+              "입찰 도중 오류가 발생했습니다."
+          );
         },
       }
     );

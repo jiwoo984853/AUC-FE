@@ -36,7 +36,7 @@ export const useBidApi = () => {
   const postBidMutation = () => {
     return useMutation<
       CreateBidResponse,
-      AxiosError<{ message: string }>,
+      AxiosError<{ message?: string; detail?: string }>,
       CreateBidRequest
     >({
       mutationFn: postBid,
